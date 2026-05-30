@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="TEXT/css" href="login.css">
+    </head>
+    <body>
+        <div class="login-page">
+            <div class="login-box">
+                <a class="logo">
+                    <span class="logo-yellow">Chanh</span><span class="logo-green">Tea</span>
+                </a>
+                <h2>Đăng nhập vào hệ thống</h2>
+                <p>Vui lòng nhập thông tin đăng nhập của bạn</p>
+                <div class="alert error">
+                    <svg fill="none" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+                    </svg>
+                    <span>Vui lòng nhập đầy đủ thông tin</span>
+                </div>
+                <form>
+                    <div class="input-wrapper">
+                        <svg class="icon" width="20" height="20" fill="none" stroke="#999" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4Z" />
+                        </svg>
+                        <input class="highlight" type="text" id="username" placeholder="Nhập tên đăng nhập"/>
+                    </div>
+                    <div class="input-wrapper">
+                        <svg class="icon" width="20" height="20" fill="none" stroke="#999" stroke-width="1.5" viewBox="0 0 24 24">
+                            <path d="M17 11H7V7a5 5 0 0110 0v4Zm-9 0h10a2 2 0 012 2v5a2 2 0 01-2 2H7a2 2 0 01-2-2v-5a2 2 0 012-2Z" />
+                        </svg>
+                        <input class="highlight" type="password" id="password" placeholder="Nhập mật khẩu"/>
+                    </div>
+                    <button type="submit" class="btn green">
+                        <svg width="20px" height="20px" viewBox="0 0 24 24" stroke="white" fill="none">
+                            <path d="M15 4H18C19.1046 4 20 4.89543 20 6V18C20 19.1046 19.1046 20 18 20H15M11 16L15 12M15 12L11 8M15 12H3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                         Đăng nhập
+                    </button>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

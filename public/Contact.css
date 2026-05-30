@@ -1,0 +1,98 @@
+.slide {
+    text-align: center;
+    background-image: linear-gradient(to right, #008000BF, #FFD700BF), url('Assets/Contact_image.jpg');
+}
+
+.grid {
+    align-items: start;
+}
+
+.body {
+    padding: 80px 0px;
+}
+
+.slide h2,
+.slide p {
+    color: #fff;
+}
+
+.contact-box,
+.message-box {
+    flex: 1;
+    padding: 30px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.contact-box h2,
+.message-box h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.info-block {
+    gap: 15px;
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.contact-box h4,
+.contact-box p {
+    margin: 0;
+    margin-bottom: 10px;
+}
+
+.contact-info {
+    text-align: left;
+}
+
+.map-placeholder {
+    background-color: #d1d5db;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    color: #374151;
+    overflow: hidden;
+    font-size: 14px;
+    height: 150px;
+    display: flex;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+form label {
+    text-align: left;
+    font-weight: 600;
+    margin: 15px 0 5px;
+}
+
+form input,
+form textarea {
+    padding: 10px;
+    font-size: 14px;
+    resize: vertical;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+form button {
+    transition: background-color 0.3s;
+    background-color: #16a34a;
+    border-radius: 8px;
+    margin-top: 25px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 12px;
+    color: white;
+    border: none;
+}
+
+form button:hover {
+    background-color: #15803d;
+}

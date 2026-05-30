@@ -1,0 +1,151 @@
+* {
+    font-family: 'Segoe UI', sans-serif;   
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+a[href*="somee.com"],
+iframe[src*="somee.com"],
+img[src*="somee.com"],
+script[src*="somee.com"],
+link[href*="somee.com"],
+div[style*="height: 65px"],
+div[onmouseover="S_ssac();"][onmouseout="D_ssac();"],
+div[style*="z-index: 2147483647"][style*="position: fixed"][style*="background-color: #202020"] {
+    display: none !important;
+}
+
+.logo {
+    font-size: 30px;
+    font-weight: 1000;
+}
+
+.logo-yellow {
+    color: #eab308;
+}
+
+.logo-green {
+    color: #16a34a;
+}
+
+body {
+    background: linear-gradient(to bottom right, #f0fff4, #fffff0);
+    font-family: 'Inter', sans-serif;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    height: 100vh;
+}
+
+.login-page {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    margin: 20px;
+    width: 100%;
+}
+
+.login-box {
+    padding: 30px;
+    width: 100%;
+    max-width: 420px;
+    background: #fff;
+    text-align: center;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+
+h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 10px 0px;
+    color: #1f2937;
+}
+
+.alert {
+    margin-bottom: 20px;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: flex;
+    gap: 10px;
+}
+
+.alert.error {
+    display: none;
+    color: #b91c1c;
+    background-color: #fee2e2;
+    border: 1px solid #fca5a5;
+}
+
+p {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 15px 0px;
+}
+
+.input-wrapper {
+    position: relative;
+    margin: 20px 0px;
+}
+
+.input-wrapper .icon {
+    transform: translateY(-50%);
+    pointer-events: none;
+    position: absolute;
+    left: 12px;
+    top: 50%;
+}
+
+.highlight {
+    transition: border-color 0.05s ease, outline 0.05s ease;
+}
+
+.highlight:focus-within {
+    border-color: #22c55e;
+    outline: 3px solid #22c55e;
+}
+
+input[type="text"],
+input[type="password"] {
+    padding: 12px 12px 12px 40px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    width: 100%;
+}
+
+.btn {
+    gap: 8px;
+    width: 100%;
+    border: none;
+    display: flex;
+    padding: 12px;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 20px;
+    font-weight: 600;
+    transition: 0.2s;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn.green {
+    background-color: #16a34a;
+    color: white;
+}
+
+.btn.green:hover {
+    background-color: #15803d;
+}
+
+.demo-info {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.5;
+}
