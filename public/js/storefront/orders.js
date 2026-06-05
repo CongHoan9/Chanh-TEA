@@ -51,35 +51,50 @@
             source: "manual",
             address: $("#customerAddress").val().trim()
         };
-        const store = await window.ChanhTeaLocation.resolveNearestStore(location, cartItems);
+        
+        let store = null;
+        try {
+            store = await window.ChanhTeaLocation.resolveNearestStore(location, cartItems);
+        } catch (error) {
+            console.warn("Could not resolve nearest store by distance:", error.message);
+        }
+
+        // Fallback: If no store is within radius or GPS fails, just pick the first active store
+        if (!store) {
+            try {
+                const res = await fetch("/api/public/stores");
+                const data = await res.json();
+                if (data.success && data.data && data.data.length > 0) {
+                    store = data.data[0]; // Pick the first available store
+                }
+            } catch (err) {
+                console.error("Failed to fetch fallback stores", err);
+            }
+        }
+
         if (!store) {
             alert("Vui lòng cung cấp vị trí hoặc địa chỉ để gán cửa hàng.");
             return null;
         }
 
         const draft = buildLocalOrderPayload(form, cartItems, store, location);
-        const response = await fetch($(form).data("endpoint") || "/api/public/orders", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                customer_name: draft.customer_name,
-                customer_phone: draft.customer_phone,
-                customer_address: draft.customer_address,
-                fulfillment_method: draft.fulfillment_method,
-                note: draft.note,
-                location,
-                items: normalizeItems(cartItems)
-            })
+        const orderData = await window.ChanhTeaAPI.createGuestOrder({
+            customer_name: draft.customer_name,
+            customer_phone: draft.customer_phone,
+            customer_address: draft.customer_address,
+            fulfillment_method: draft.fulfillment_method,
+            note: draft.note,
+            location,
+            items: normalizeItems(cartItems)
         });
-        const payload = await response.json();
-        if (!response.ok || !payload.data) {
-            alert(payload.message || "Không tạo được đơn hàng.");
+        if (!orderData) {
+            alert("Không tạo được đơn hàng.");
             return null;
         }
         const order = {
-            ...payload.data,
-            assigned_store: payload.data.assigned_store || store,
-            items: payload.data.items || cartItems
+            ...orderData,
+            assigned_store: orderData.assigned_store || store,
+            items: orderData.items || cartItems
         };
 
         const createdOrders = getCreatedOrders();
@@ -111,11 +126,8 @@
     }
 
     async function findOrder(code, phone) {
-        const response = await fetch(`/api/public/orders/${encodeURIComponent(code)}?phone=${encodeURIComponent(phone)}`);
-        if (response.status === 404) return null;
-        const payload = await response.json();
-        if (!response.ok) throw new Error(payload.message || "Không tra cứu được đơn hàng.");
-        return payload.data || null;
+        const orderData = await window.ChanhTeaAPI.getPublicOrder(code, phone);
+        return orderData || null;
     }
 
     window.ChanhTeaOrders = {

@@ -296,3 +296,17 @@
 .arrow {
     margin-left: 5px;
 }
+
+.review-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 40px;
+    background: linear-gradient(135deg, #16a34a, #facc15);
+    color: white;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}

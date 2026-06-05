@@ -1,0 +1,153 @@
+/* Admin Flat UI Styles */
+.admin-shell {
+    background-color: #fff;
+}
+
+.admin-flat-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.admin-flat-card {
+    background: transparent;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-flat-card h3 {
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.admin-flat-card span {
+    font-size: 13px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.admin-flat-card strong {
+    font-size: 28px;
+    color: #111827;
+}
+
+.admin-flat-layout {
+    display: flex;
+    gap: 32px;
+    padding: 20px 0;
+}
+
+.admin-flat-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-flat-table th {
+    text-align: left;
+    padding: 12px 0;
+    color: #475569;
+    font-weight: 600;
+    font-size: 14px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.admin-flat-table td {
+    padding: 16px 0;
+    border-bottom: 1px solid #e2e8f0;
+    color: #1e293b;
+    font-size: 15px;
+}
+
+.admin-flat-table tr:last-child td {
+    border-bottom: none;
+}
+
+.panel-toolbar {
+    margin-bottom: 20px;
+    border-bottom: 2px solid #10b981;
+    padding-bottom: 10px;
+}
+.panel-toolbar h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #111827;
+}
+
+/* Global flat overrides for all dashboards (store + admin) */
+.ops-card,
+.store-context,
+.assignment-card,
+.order-created,
+.dashboard-panel,
+.order-lane,
+.table-shell,
+.card {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.dashboard-panel {
+    padding: 20px 0 !important;
+    border-bottom: none !important; /* Panel itself shouldn't have bottom border */
+}
+
+/* Dashboard Hero Banner */
+.dashboard-hero-full {
+    background: linear-gradient(135deg, #15803d 0%, #eab308 100%);
+    padding: 60px 0; /* Padding instead of fixed margins */
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-hero-full::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+}
+
+.dashboard-hero-full::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: 10%;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+}
+
+.dashboard-hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.dashboard-hero-content h2 {
+    margin: 0 0 12px 0;
+    font-size: 28px;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.dashboard-hero-content p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    opacity: 0.95;
+    line-height: 1.5;
+    max-width: 800px;
+}

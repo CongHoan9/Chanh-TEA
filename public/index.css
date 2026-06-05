@@ -1,5 +1,24 @@
 * {
     font-family: 'Segoe UI', sans-serif;
+    /* Vô hiệu hóa bôi đen (text selection) toàn cục */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Cho phép bôi đen/chọn text ở các trường nhập liệu */
+input, textarea, select {
+    -webkit-user-select: auto;
+    -moz-user-select: auto;
+    -ms-user-select: auto;
+    user-select: auto;
+}
+
+/* Vô hiệu hóa kéo thả ảnh và thẻ link toàn cục */
+img, a, svg {
+    -webkit-user-drag: none;
+    user-drag: none;
 }
 
 .cart-a, .tracking-btn {
@@ -14,8 +33,9 @@
 }
 
 .cart-a p, #trackingCount {
-    top: -100%;
-    right: -50%;
+    top: -8px;
+    right: -10px;
+    margin: 0;
     width: 20px;
     height: 20px;
     color: white;
@@ -609,10 +629,9 @@ select:focus {
 }
 
 .checkout-section {
-    padding: 14px;
-    border-radius: 12px;
-    background: #f9fafb;
-    border: 1px solid #edf2f7;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .checkout-section h4 {
@@ -1080,3 +1099,334 @@ select:focus {
         display: none !important;
     }
 }
+
+.product-image-placeholder,
+.cart-image-placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 160px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background: linear-gradient(135deg, #f0fdf4, #fefce8);
+    color: #15803d;
+    font-size: 44px;
+    font-weight: 700;
+}
+
+.product-image-placeholder small {
+    color: #65a30d;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.product-placeholder {
+    min-height: 280px;
+    padding: 0 !important;
+}
+
+.review-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 40px;
+    background: linear-gradient(135deg, #16a34a, #facc15);
+    color: white;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+
+
+/* BounceCards Styles */
+.bounceCardsWrapper {
+    width: 100%;
+    max-width: 100vw;
+    scrollbar-width: none;
+    padding: 200px 00px;
+    margin: -250px 00px;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+}
+
+.bounceCardsWrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.bounceCardsContainer {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-width: 1400px;
+    height: 600px;
+    margin: 0px 00px;
+}
+
+.bounceCardsContainer .card {
+  position: absolute;
+  width: 320px;
+  aspect-ratio: 3 / 4;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  background: white;
+  padding: 5px;
+  opacity: 0;
+  transform: scale(0);
+}
+
+/* Prevent CSS transition from fighting with GSAP animation on these cards */
+.bounceCardsContainer .product.card {
+    transition: box-shadow 0.3s ease !important; /* Remove transform transition */
+}
+.bounceCardsContainer .product.card:hover {
+    transform: none; /* Let GSAP handle the hover scale */
+}
+
+.bounceCardsContainer .card .image-layout {
+  flex: 1;
+  min-height: 0;
+}
+
+.bounceCardsContainer .card .image-layout img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Premium Product Card Design */
+.product.card {
+    padding: 5px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    aspect-ratio: 3 / 4;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product.card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+}
+
+.product.card .image-layout {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+    border-radius: 15px 15px 0 0; /* Inner curve */
+    overflow: hidden;
+}
+
+.product.card .image-layout img {
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ========================================= */
+/* TRUE MEDAL PODIUM REDESIGN */
+/* ========================================= */
+
+/* Floating Decorations for Trending Section */
+.floating-deco {
+    height: auto;
+    width: auto;
+    position: absolute;
+    pointer-events: none;
+    z-index: 5;
+    object-fit: cover;
+    filter: drop-shadow(0 15px 20px rgba(0,0,0,0.15));
+}
+
+.floating-deco.leaf {
+    width: 100px;
+    top: 20%;
+    right: 0%;
+    animation: floatLeaf 8s ease-in-out infinite alternate;
+}
+
+.floating-deco.peel {
+    width: 140px;
+    bottom: -10%;
+    left: 0%;
+    animation: floatPeel 12s ease-in-out infinite alternate;
+}
+
+@keyframes floatLeaf {
+    0% { transform: translateY(0) rotate(-10deg) scale(1); }
+    50% { transform: translateY(-40px) rotate(20deg) scale(1.1); }
+    100% { transform: translateY(15px) rotate(5deg) scale(0.95); }
+}
+
+@keyframes floatPeel {
+    0% { transform: translateY(0) rotate(15deg) scale(1); }
+    50% { transform: translateY(-50px) rotate(-10deg) scale(1.1); }
+    100% { transform: translateY(-20px) rotate(25deg) scale(0.95); }
+}
+
+
+.trending-podium {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 30px;
+    overflow-x: auto;
+    scrollbar-width: none; /* Hide scrollbar Firefox */
+}
+
+.trending-podium::-webkit-scrollbar {
+    display: none; /* Hide scrollbar WebKit */
+}
+
+@media (max-width: 900px) {
+    .trending-podium {
+        justify-content: flex-start; /* Avoid left-side clipping when overflowing */
+    }
+}
+
+.podium-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex-shrink: 0; /* Prevent squishing on mobile */
+}
+
+/* Order arrangement for 2 - 1 - 3 */
+.podium-step.step-1 { order: 2; z-index: 3; }
+.podium-step.step-2 { order: 1; z-index: 2; }
+.podium-step.step-3 { order: 3; z-index: 1; }
+
+/* Product Cards resting on podium */
+.podium-step .product.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: white; /* Ensure card is opaque above podium */
+}
+
+/* Animated Gradient Keyframes */
+@keyframes cardGradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.podium-step.step-1 .product.card { 
+    width: 340px; 
+    outline: 3px solid #FFD700 !important; 
+    outline-offset: -1px; 
+    box-shadow: 0 20px 40px rgba(255, 215, 0, 0.3);
+    background: linear-gradient(135deg, #fffdf0, #fff7d6, #ffed9e, #fff7d6);
+    background-size: 300% 300%;
+    animation: cardGradientMove 4s ease infinite;
+}
+
+.podium-step.step-2 .product.card { 
+    width: 290px; 
+    outline: 3px solid #C0C0C0 !important; 
+    outline-offset: -1px; 
+    box-shadow: 0 15px 30px rgba(192, 192, 192, 0.2);
+    background: linear-gradient(135deg, #ffffff, #f1f5f9, #e2e8f0, #f1f5f9);
+    background-size: 300% 300%;
+    animation: cardGradientMove 5s ease infinite;
+}
+
+.podium-step.step-3 .product.card { 
+    width: 290px; 
+    outline: 3px solid #CD7F32 !important; 
+    outline-offset: -1px; 
+    box-shadow: 0 15px 30px rgba(205, 127, 50, 0.2);
+    background: linear-gradient(135deg, #fff5f0, #ffe4d6, #ffccb3, #ffe4d6);
+    background-size: 300% 300%;
+    animation: cardGradientMove 6s ease infinite;
+}
+
+.podium-step .product.card:hover { transform: translateY(-15px); }
+
+/* The Physical Podium Blocks */
+.podium-block {
+    width: 160px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 40px; /* Offset text to account for the pointy bottom */
+    filter: drop-shadow(0 15px 15px rgba(0,0,0,0.15));
+    position: relative;
+    z-index: -1; /* Place slightly behind card */
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 40px), 50% 100%, 0 calc(100% - 40px));
+}
+
+/* Mimic inset shadow for 3D highlight at the top */
+.podium-block::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 30px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.5), transparent);
+    z-index: 0;
+}
+
+/* Base heights and colors for podium blocks */
+.podium-step.step-1 .podium-block { height: 180px; background: linear-gradient(160deg, #FFDF00, #DAA520); }
+.podium-step.step-2 .podium-block { height: 130px; background: linear-gradient(160deg, #E0E0E0, #A9A9A9); }
+.podium-step.step-3 .podium-block { height: 100px; background: linear-gradient(160deg, #FFA07A, #CD7F32); }
+
+/* Rank Number styling */
+.podium-block .rank-number {
+    font-size: 56px;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0px 4px 10px rgba(0,0,0,0.25);
+    font-family: Arial, sans-serif;
+}
+
+/* ========================================= */
+/* FLOATING TOPPINGS CLOUD */
+/* ========================================= */
+.toppings-section {
+    text-align: center;
+}
+.toppings-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    perspective: 1000px;
+}
+
+.topping-bubble {
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    border-radius: 50px;
+    padding: 16px 32px;
+    box-shadow: 0 12px 25px rgba(0,0,0,0.06), inset 0 2px 5px rgba(255,255,255,0.9);
+    font-size: 18px;
+    font-weight: 700;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Floating animation */
+    animation: floatBubble 3s ease-in-out infinite alternate;
+    animation-delay: var(--anim-delay, 0s);
+    border: 2px solid #e2e8f0;
+}
+
+.topping-bubble:hover {
+    transform: scale(1.15) translateY(-5px);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-color: #059669;
+    box-shadow: 0 15px 35px rgba(16, 185, 129, 0.4);
+    animation-play-state: paused;
+}
+
+@keyframes floatBubble {
+    0% { transform: translateY(0px) rotate(0deg); }
+    100% { transform: translateY(-20px) rotate(2deg); }
+}
+

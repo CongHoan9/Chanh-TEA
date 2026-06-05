@@ -286,3 +286,51 @@ hr {
         grid-template-columns: 1fr;
     }
 }
+
+/* 2-Column Checkout Layout */
+.checkout-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    align-items: start;
+    margin-bottom: 40px;
+}
+
+@media (max-width: 992px) {
+    .checkout-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .checkout-sidebar {
+        position: static !important;
+    }
+}
+
+.products-scroll-vertical {
+    max-height: 350px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.products-scroll-vertical::-webkit-scrollbar {
+    width: 6px;
+}
+.products-scroll-vertical::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+    border-radius: 4px;
+}
+.products-scroll-vertical::-webkit-scrollbar-thumb {
+    background: #c1c1c1; 
+    border-radius: 4px;
+}
+.products-scroll-vertical::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8; 
+}
+
+.products-scroll .cart-image-placeholder {
+    min-height: 40px;
+    border-radius: 8px;
+    font-size: 20px;
+}

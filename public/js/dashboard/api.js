@@ -4,7 +4,8 @@
             "Content-Type": "application/json",
             "x-ops-tier": profile?.tier || "guest",
             "x-ops-role": profile?.role || "guest",
-            "x-store-ids": (profile?.storeIds || []).join(",")
+            "x-store-ids": (profile?.storeIds || []).join(","),
+            "Authorization": profile?.token ? `Bearer ${profile.token}` : undefined
         };
     }
 
@@ -41,6 +42,28 @@
         return request("/api/admin/stores", profile);
     }
 
+    function createAdminStore(profile, body) {
+        return request("/api/admin/stores", profile, {
+            method: "POST",
+            body: JSON.stringify(body)
+        });
+    }
+
+    function updateAdminStore(profile, id, body) {
+        return request(`/api/admin/stores/${id}`, profile, {
+            method: "PUT",
+            body: JSON.stringify(body)
+        });
+    }
+
+    function adminSummary(profile) {
+        return request("/api/admin/summary", profile);
+    }
+
+    function adminRegionReport(profile) {
+        return request("/api/admin/regions-stores-report", profile);
+    }
+
     function adminUsers(profile) {
         return request("/api/admin/users", profile);
     }
@@ -53,14 +76,28 @@
         return request("/api/admin/audit-logs", profile);
     }
 
+    async function adminAnalyticsBranches() {
+        return fetchAuth('/api/admin/analytics/branches');
+    }
+
+    async function adminAnalyticsProducts() {
+        return fetchAuth('/api/admin/analytics/products');
+    }
+
     window.ChanhTeaDashboardApi = {
         publicStores,
         storeSummary,
         storeOrders,
         storeProducts,
         adminStores,
+        createAdminStore,
+        updateAdminStore,
+        adminSummary,
+        adminRegionReport,
         adminUsers,
         storeUsers,
-        auditLogs
+        auditLogs,
+        adminAnalyticsBranches,
+        adminAnalyticsProducts
     };
 })();
