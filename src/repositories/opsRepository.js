@@ -10,6 +10,7 @@ function storeSelect() {
   return `
     select
       s.id,
+      s.region_id,
       s.code,
       s.name,
       s.phone,
@@ -48,6 +49,70 @@ async function getStoreIdsForProfile(profile) {
 async function listStores() {
   const { rows } = await db.query(`${storeSelect()} order by s.priority asc, s.name asc`);
   return rows;
+}
+
+async function createStore(body, actorProfile) {
+  const client = await db.pool.connect();
+  try {
+    await client.query('begin');
+
+    const { rows: countRows } = await client.query('select count(*) as count from public.stores');
+    const storeNumber = parseInt(countRows[0].count) + 1;
+    const code = `ST${storeNumber.toString().padStart(3, '0')}`;
+    const email = `store_${code}@chanhtea.com`;
+    
+    const { rows: regionRows } = await client.query('select id, province from public.regions limit 1');
+    const region = regionRows[0] || { id: null, province: body.province || 'Hanoi' };
+
+    const storeResult = await client.query(`
+      insert into public.stores (
+        region_id, code, name, phone, email, province, district, ward, address, location, service_radius_m
+      ) values (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, st_setsrid(st_makepoint($10, $11), 4326)::geography, $12
+      ) returning *
+    `, [
+      region.id, code, body.name, body.phone || '', email, body.province || region.province, 
+      body.district || '', body.ward || '', body.address, 
+      Number(body.lng || 106.0), Number(body.lat || 10.0), Number(body.service_radius_m || 3000)
+    ]);
+    const store = storeResult.rows[0];
+
+    const userResult = await client.query(`
+      insert into auth.users (
+        id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, 
+        raw_app_meta_data, raw_user_meta_data, created_at, updated_at
+      ) values (
+        gen_random_uuid(), '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 
+        $1, crypt($2, gen_salt('bf')), now(), 
+        '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb, now(), now()
+      ) returning id
+    `, [email, code]);
+    const userId = userResult.rows[0].id;
+
+    await client.query(`
+      insert into public.profiles (id, email, full_name, role)
+      values ($1, $2, $3, 'store_manager')
+      on conflict (id) do update set role = 'store_manager'
+    `, [userId, email, body.name]);
+
+    await client.query(`
+      insert into public.store_members (store_id, user_id, role)
+      values ($1, $2, 'store_manager')
+    `, [store.id, userId]);
+
+    await client.query(`
+      insert into public.audit_logs(actor_id, actor_role, action, entity_type, entity_id, store_id, new_data)
+      values ($1, $2, 'store.create', 'stores', $3, $4, $5)
+    `, [actorProfile.id, actorProfile.role, store.id, store.id, JSON.stringify(store)]);
+
+    await client.query('commit');
+    return store;
+  } catch (err) {
+    await client.query('rollback');
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 async function listProducts() {
@@ -164,10 +229,10 @@ async function createGuestOrder(body) {
     };
   });
 
-  const store = await resolveNearestStore(body.location || {}, normalizedItems.map(item => ({ product_id: item.product.id })));
-  if (!store) {
-    const error = new Error('No active store can serve this order.');
-    error.status = 422;
+  const storeId = body.store_id;
+  if (!storeId) {
+    const error = new Error('store_id is required to create an order.');
+    error.status = 400;
     throw error;
   }
 
@@ -206,7 +271,7 @@ async function createGuestOrder(body) {
       `,
       [
         code,
-        store.id,
+        storeId,
         body.customer_name,
         body.customer_phone,
         body.customer_address,
@@ -262,7 +327,7 @@ async function createGuestOrder(body) {
     );
 
     await client.query('commit');
-    return { ...order, items: orderItems, assigned_store: store };
+    return { ...order, items: orderItems, assigned_store_id: storeId };
   } catch (error) {
     await client.query('rollback');
     throw error;
@@ -541,16 +606,183 @@ async function listAuditLogs() {
   return rows;
 }
 
+async function listRegions() {
+  const { rows } = await db.query('select * from public.regions where is_active = true order by name asc');
+  return rows;
+}
+
+async function getAdminSummary() {
+  const { rows: stores } = await db.query('select count(*) as count from public.stores where is_active = true');
+  const { rows: totalUsers } = await db.query('select count(*) as count from public.profiles where role = $1', ['store_manager']);
+  
+  const { rows: orderStats } = await db.query(`
+    select 
+      count(*) as total_orders,
+      sum(total) as revenue_today,
+      count(case when status = 'pending' then 1 end) as new_orders
+    from public.orders
+    where created_at >= current_date
+  `);
+  
+  const { rows: topStores } = await db.query(`
+    select 
+      s.name,
+      count(o.id) as order_count,
+      coalesce(sum(o.total), 0) as revenue
+    from public.stores s
+    left join public.orders o on o.assigned_store_id = s.id and o.status = 'completed'
+    group by s.id, s.name
+    order by revenue desc
+    limit 5
+  `);
+
+  const { rows: chartData } = await db.query(`
+    select 
+      date(created_at) as date,
+      coalesce(sum(total), 0) as revenue
+    from public.orders
+    where created_at >= current_date - interval '6 days'
+    group by date(created_at)
+    order by date(created_at) asc
+  `);
+
+  return {
+    active_stores: parseInt(stores[0].count) || 0,
+    store_managers: parseInt(totalUsers[0].count) || 0,
+    total_orders: parseInt(orderStats[0].total_orders) || 0,
+    revenue_today: parseInt(orderStats[0].revenue_today) || 0,
+    new_orders: parseInt(orderStats[0].new_orders) || 0,
+    top_stores: topStores,
+    chart_data: chartData
+  };
+}
+
+async function getAdminRegionReport() {
+  const { rows } = await db.query(`
+    select 
+      r.id as region_id,
+      r.name as region_name,
+      coalesce(
+        jsonb_agg(
+          jsonb_build_object(
+            'id', s.id,
+            'name', s.name,
+            'address', s.address,
+            'revenue', coalesce(o_stats.revenue, 0),
+            'order_count', coalesce(o_stats.order_count, 0)
+          ) order by coalesce(o_stats.revenue, 0) desc
+        ) filter (where s.id is not null),
+        '[]'::jsonb
+      ) as stores
+    from public.regions r
+    left join public.stores s on s.region_id = r.id and s.is_active = true
+    left join (
+      select 
+        assigned_store_id,
+        sum(total) as revenue,
+        count(id) as order_count
+      from public.orders
+      where created_at >= current_date and status = 'completed'
+      group by assigned_store_id
+    ) o_stats on o_stats.assigned_store_id = s.id
+    group by r.id, r.name
+    order by r.name asc
+  `);
+  return rows;
+}
+
+async function updateAdminStore(storeId, body) {
+  const { is_active, service_radius_m, lat, lng } = body;
+  
+  let updateQuery = `
+    update public.stores
+    set is_active = $1,
+        service_radius_m = $2
+  `;
+  const params = [is_active, service_radius_m, storeId];
+  
+  if (lat !== undefined && lng !== undefined) {
+    updateQuery += `, location = st_setsrid(st_makepoint($4, $5), 4326)::geography`;
+    params.push(lng, lat);
+  }
+  
+  updateQuery += `
+    where id = $3
+    returning ${storeSelect().replace('select', '')}
+  `;
+  
+  const { rows } = await db.query(updateQuery, params);
+  return rows[0];
+}
+
+async function getBranchRanking() {
+  const { rows } = await db.query(`
+    SELECT 
+        s.id,
+        s.name,
+        COUNT(o.id) as total_orders,
+        COALESCE(SUM(o.total), 0) as total_revenue,
+        COALESCE(AVG(EXTRACT(EPOCH FROM (o.completed_at - o.created_at))), 0) as avg_processing_seconds
+    FROM public.stores s
+    LEFT JOIN public.orders o ON s.id = o.assigned_store_id AND o.completed_at IS NOT NULL
+    GROUP BY s.id, s.name
+    ORDER BY total_revenue DESC
+  `);
+  return rows;
+}
+
+async function getProductAnalytics() {
+  const { rows: topProducts } = await db.query(`
+    SELECT 
+        p.id, p.name,
+        SUM(oi.qty) as total_sold,
+        SUM(oi.total) as total_revenue,
+        (SUM(oi.total) - SUM(oi.qty * COALESCE(p.cost_price, 0))) as total_profit
+    FROM public.products p
+    JOIN public.order_items oi ON p.id = oi.product_id
+    JOIN public.orders o ON oi.order_id = o.id
+    WHERE o.completed_at IS NOT NULL
+    GROUP BY p.id, p.name
+    ORDER BY total_sold DESC
+    LIMIT 10
+  `);
+
+  const { rows: upsell } = await db.query(`
+    SELECT 
+        p1.name as product_a, 
+        p2.name as product_b, 
+        COUNT(*) as frequency
+    FROM public.order_items oi1
+    JOIN public.order_items oi2 ON oi1.order_id = oi2.order_id AND oi1.product_id < oi2.product_id
+    JOIN public.products p1 ON oi1.product_id = p1.id
+    JOIN public.products p2 ON oi2.product_id = p2.id
+    JOIN public.orders o ON oi1.order_id = o.id
+    WHERE o.completed_at IS NOT NULL
+    GROUP BY p1.name, p2.name
+    ORDER BY frequency DESC
+    LIMIT 10
+  `);
+
+  return { topProducts, upsell };
+}
+
 module.exports = {
-  listStores,
   listProducts,
+  listRegions,
+  listStores,
+  updateAdminStore,
   resolveNearestStore,
-  createGuestOrder,
-  findPublicOrder,
-  listOrders,
-  updateOrderStatus,
+  createStore,
   listStoreProducts,
   listStoreUsers,
+  listOrders,
   getStoreSummary,
-  listAuditLogs
+  getAdminSummary,
+  getAdminRegionReport,
+  listAuditLogs,
+  createGuestOrder,
+  findPublicOrder,
+  updateOrderStatus,
+  getBranchRanking,
+  getProductAnalytics
 };

@@ -1,69 +1,78 @@
-const Order = require('../models/Order');
+// src/controllers/orderController.js
+/**
+ * Order Controller
+ * Handles order-related HTTP requests, delegating to the repository and services.
+ * Uses Supabase Auth middleware to access req.opsProfile where applicable.
+ */
 
-const orderController = {
-  // POST /api/orders
-  async create(req, res, next) {
-    try {
-      const cart = req.session.cart || [];
-      if (!cart.length) return res.status(400).json({ success: false, message: 'Giỏ hàng trống' });
+const opsRepository = require('../repositories/opsRepository');
+const routingService = require('../services/routingService');
 
-      const { name, phone, address, note, paymentMethod } = req.body;
-      if (!name || !phone || !address) {
-        return res.status(400).json({ success: false, message: 'Vui lòng điền đầy đủ thông tin giao hàng' });
-      }
-
-      const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
-      const order = await Order.create({
-        items: cart,
-        total,
-        customer: { name, phone, address, note },
-        paymentMethod: paymentMethod || 'cod'
-      });
-
-      req.session.cart = [];
-      req.session.lastOrder = order.id;
-      res.json({ success: true, message: 'Đặt hàng thành công!', data: { orderId: order.id } });
-    } catch (err) {
-      next(err);
+/**
+ * Create a guest order (public endpoint).
+ * Expected body: { items: [{productId, quantity}], location: { lat, lng } }
+ */
+async function createGuestOrder(req, res) {
+  try {
+    const { items, location } = req.body;
+    // Validate payload (basic)
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ success: false, message: 'Invalid order items.' });
     }
-  },
-
-  // GET /api/orders/:id
-  async getOne(req, res, next) {
-    try {
-      const order = await Order.getById(req.params.id);
-      if (!order) return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng' });
-      res.json({ success: true, data: order });
-    } catch (err) {
-      next(err);
+    // Resolve nearest store using routing service (which may apply scoring rules)
+    const store = await routingService.resolveStore(location, items);
+    if (!store) {
+      return res.status(422).json({ success: false, message: 'No active store can serve this location.' });
     }
-  },
-
-  // GET /api/orders (admin)
-  async getAll(req, res, next) {
-    try {
-      const orders = await Order.getAll();
-      res.json({ success: true, data: orders });
-    } catch (err) {
-      next(err);
-    }
-  },
-
-  // PATCH /api/orders/:id/status (admin)
-  async updateStatus(req, res, next) {
-    try {
-      const { status } = req.body;
-      const validStatuses = ['pending', 'confirmed', 'preparing', 'delivering', 'done', 'cancelled'];
-      if (!validStatuses.includes(status)) {
-        return res.status(400).json({ success: false, message: 'Trạng thái không hợp lệ' });
-      }
-      const order = await Order.updateStatus(req.params.id, status);
-      if (!order) return res.status(404).json({ success: false, message: 'Không tìm thấy đơn hàng' });
-      res.json({ success: true, data: order });
-    } catch (err) {
-      next(err);
-    }
+    // Delegate creation to repository, passing resolved store id
+    const order = await opsRepository.createGuestOrder({ ...req.body, store_id: store.id });
+    return res.status(201).json({ success: true, data: order });
+  } catch (err) {
+    console.error('Error creating guest order:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
   }
-};
+}
 
-module.exports = orderController;
+/**
+ * Retrieve a public order by code (public endpoint).
+ */
+async function getPublicOrder(req, res) {
+  try {
+    const { code } = req.params;
+    const { phone } = req.query;
+    const order = await opsRepository.findPublicOrder(code, phone);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+    return res.json({ success: true, data: order });
+  } catch (err) {
+    console.error('Error fetching public order:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+}
+
+/**
+ * Update order status (store protected endpoint).
+ * Expected body: { status: 'prepared' | 'delivered' | ... , note?: string }
+ */
+async function patchOrderStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const { status, note } = req.body;
+    const profile = req.opsProfile;
+    const order = await opsRepository.updateOrderStatus(profile, id, status, note);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+    return res.json({ success: true, data: order });
+  } catch (err) {
+    console.error('Error updating order status:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+}
+
+module.exports = {
+  createGuestOrder,
+  getPublicOrder,
+  patchOrderStatus,
+};
