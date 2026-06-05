@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChanhTea Operations</title>
+    <link rel="stylesheet" type="text/css" href="/Main.css">
+    <link rel="stylesheet" type="text/css" href="/admin.css">
+</head>
+<body class="dashboard-body" data-app-shell="role-dynamic">
+<section class="admin-shell" data-tier="<%= data.user.role %>" style="display:block;">
+    <header>
+        <div class="Container">
+            <nav class="navbar">
+                <div class="nav-left">
+                    <div class="logo">
+                        <span class="logo-yellow">Chanh</span><span class="logo-green">Tea</span>
+                    </div>
+                    <ul class="nav-links">
+                        <% if (data.user.role === 'system_admin') { %>
+                            <li><a href="/dashboard">Tổng quan</a></li>
+                        <% } else { %>
+                            <li><a href="/dashboard">Đơn hàng</a></li>
+                        <% } %>
+                        <li><a href="/">Về Storefront</a></li>
+                    </ul>
+                </div>
+                <div class="nav-actions">
+                    <span class="ops-user-badge"><%= data.user.role %></span>
+                    <button class="ops-logout" onclick="window.ChanhTeaDashboardApi.logout()">Thoát</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <% if (data.user.role === 'system_admin' && data.summary) { %>
+        <section class="ops-panel admin-overview active" data-dashboard-panel="admin-overview" data-module="admin-overview">
+            <div class="hero-header" style="background: linear-gradient(135deg, #15803d 0%, #eab308 100%);">
+                <div class="Container">
+                    <h2>Tổng quan hệ thống</h2>
+                    <p>"Tầm nhìn bao quát, quyết định chính xác." - Chào mừng <%= data.user.email %></p>
+                </div>
+            </div>
+            <main class="Container" style="padding-top: 30px;">
+                <div class="admin-flat-metrics">
+                    <div class="admin-flat-card">
+                        <span>Doanh thu hôm nay</span>
+                        <strong><%= (data.summary.revenue_today || 0).toLocaleString('vi-VN') %> ₫</strong>
+                    </div>
+                    <div class="admin-flat-card">
+                        <span>Tổng đơn hôm nay</span>
+                        <strong><%= data.summary.total_orders || 0 %></strong>
+                    </div>
+                    <div class="admin-flat-card">
+                        <span>Đơn chờ xử lý</span>
+                        <strong><%= data.summary.new_orders || 0 %></strong>
+                    </div>
+                    <div class="admin-flat-card">
+                        <span>Chi nhánh HĐ</span>
+                        <strong><%= data.summary.active_stores || 0 %></strong>
+                    </div>
+                </div>
+                
+                <div class="admin-flat-layout">
+                    <div class="admin-flat-card" style="flex:2">
+                        <h3>Biểu đồ doanh thu (7 ngày)</h3>
+                        <div style="height: 300px;"><canvas id="adminRevenueChart"></canvas></div>
+                    </div>
+                    <div class="admin-flat-card" style="flex:1">
+                        <h3>Top Chi nhánh</h3>
+                        <table class="admin-flat-table">
+                            <thead><tr><th>Chi nhánh</th><th>Doanh thu</th></tr></thead>
+                            <tbody>
+                                <% if (data.summary.top_stores && data.summary.top_stores.length > 0) { %>
+                                    <% data.summary.top_stores.forEach(st => { %>
+                                        <tr>
+                                            <td><%= st.name %></td>
+                                            <td style="color:#059669; font-weight:600;"><%= (st.revenue || 0).toLocaleString('vi-VN') %> ₫</td>
+                                        </tr>
+                                    <% }) %>
+                                <% } else { %>
+                                    <tr><td colspan="2">Chưa có dữ liệu</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </section>
+        <script>
+            window.ChanhTeaData = <%- JSON.stringify(data) %>;
+        </script>
+    <% } else { %>
+        <section class="ops-panel store-orders active" data-dashboard-panel="store-orders" data-module="store-orders">
+            <div class="hero-header" style="background: linear-gradient(135deg, #1d4ed8 0%, #8b5cf6 100%);">
+                <div class="Container">
+                    <h2>Đơn hàng cửa hàng</h2>
+                    <p>"Nhanh chóng, chính xác, tận tâm." - Chào mừng <%= data.user.email %></p>
+                </div>
+            </div>
+            <main class="Container" style="padding-top: 30px;">
+                <div class="admin-flat-metrics">
+                    <div class="admin-flat-card">
+                        <span>Đơn mới</span>
+                        <strong><%= data.orders.filter(o => o.status === 'pending' || o.status === 'assigned').length %></strong>
+                    </div>
+                    <div class="admin-flat-card">
+                        <span>Đang làm</span>
+                        <strong><%= data.orders.filter(o => o.status === 'preparing' || o.status === 'delivering').length %></strong>
+                    </div>
+                    <div class="admin-flat-card">
+                        <span>Đã xong</span>
+                        <strong><%= data.orders.filter(o => o.status === 'completed').length %></strong>
+                    </div>
+                </div>
+                
+                <div class="admin-flat-card" style="margin-top:20px;">
+                    <h3>Danh sách đơn hàng</h3>
+                    <table class="admin-flat-table">
+                        <thead><tr><th>Mã đơn</th><th>Giờ đặt</th><th>Khách hàng</th><th>Món</th><th>Tổng tiền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                        <tbody>
+                            <% if (data.orders && data.orders.length > 0) { %>
+                                <% data.orders.forEach(o => { %>
+                                    <tr>
+                                        <td><%= o.order_code %></td>
+                                        <td><%= new Date(o.created_at).toLocaleTimeString('vi-VN') %></td>
+                                        <td><%= o.customer_name %></td>
+                                        <td><%= o.total_items %> món</td>
+                                        <td><%= (o.total_price || 0).toLocaleString('vi-VN') %> ₫</td>
+                                        <td><span class="status-badge <%= o.status %>"><%= o.status %></span></td>
+                                        <td>
+                                            <% if (o.status === 'assigned') { %>
+                                                <button class="ops-btn primary" onclick="updateOrderStatus('<%= o.id %>', 'preparing')">Làm món</button>
+                                            <% } else if (o.status === 'preparing') { %>
+                                                <button class="ops-btn primary" onclick="updateOrderStatus('<%= o.id %>', 'delivering')">Giao hàng</button>
+                                            <% } else if (o.status === 'delivering') { %>
+                                                <button class="ops-btn primary" onclick="updateOrderStatus('<%= o.id %>', 'completed')">Hoàn thành</button>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr><td colspan="7">Không có đơn hàng nào</td></tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </section>
+        <script>
+            window.ChanhTeaData = <%- JSON.stringify(data) %>;
+            async function updateOrderStatus(id, status) {
+                if (confirm('Cập nhật trạng thái thành ' + status + '?')) {
+                    try {
+                        const res = await fetch('/api/store/orders/' + id + '/status', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ status })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            window.location.reload();
+                        } else {
+                            alert('Lỗi: ' + data.message);
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert('Lỗi kết nối');
+                    }
+                }
+            }
+        </script>
+    <% } %>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    if (window.ChanhTeaData && window.ChanhTeaData.analytics && window.ChanhTeaData.user.role === 'system_admin') {
+        const ctx = document.getElementById('adminRevenueChart').getContext('2d');
+        const data = window.ChanhTeaData.analytics.revenueData || [];
+        const labels = data.map(d => d.date);
+        const values = data.map(d => d.revenue);
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Doanh thu (VNĐ)',
+                    data: values,
+                    borderColor: '#16a34a',
+                    backgroundColor: 'rgba(22, 163, 74, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>

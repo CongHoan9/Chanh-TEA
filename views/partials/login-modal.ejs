@@ -1,0 +1,38 @@
+<div id="loginModal" style="display:none; position:fixed; top:75px; right: 5%; z-index:9999; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); width: 320px; border: 1px solid #eaeaea; overflow:hidden;">
+    <div style="background: #16a34a; color: white; text-align: center; padding: 15px; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; position:relative;">
+        ĐĂNG NHẬP
+        <button onclick="document.getElementById('loginModal').style.display='none'; document.body.style.overflow='auto';" style="position:absolute; right:15px; top:12px; background:transparent; border:none; color:white; font-size:20px; cursor:pointer;">&times;</button>
+    </div>
+    
+    <form id="popupLoginForm" style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+        <div id="loginAlert" style="display:none; color:#b91c1c; background-color:#fee2e2; border:1px solid #fca5a5; padding:10px; border-radius:4px; font-size:13px; text-align:center;">
+            <span id="loginAlertMsg">Vui lòng nhập đầy đủ thông tin</span>
+        </div>
+
+        <select id="popupRoleSelect" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background-color: #f8fafc; width: 100%; outline: none; font-family: inherit;">
+            <option value="admin">Quản trị</option>
+            <option value="branch">Nhân viên / Chi nhánh</option>
+        </select>
+
+        <div id="popupAdminWrapper" style="display:flex; flex-direction:column;">
+            <input id="popupEmail" type="email" placeholder="Tài khoản email" required style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background-color: #f8fafc; width: 100%; outline: none; font-family: inherit; box-sizing: border-box;">
+        </div>
+
+        <div id="popupRegionWrapper" style="display:none; flex-direction:column; gap:10px;">
+            <select id="popupRegionSelect" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background-color: #f8fafc; width: 100%; outline: none; font-family: inherit;">
+                <option value="">Khu vực...</option>
+            </select>
+            <select id="popupBranchSelect" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background-color: #f8fafc; width: 100%; outline: none; font-family: inherit;">
+                <option value="">Chi nhánh...</option>
+            </select>
+        </div>
+
+        <input id="popupPassword" type="password" placeholder="Mật khẩu" required style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; background-color: #f8fafc; width: 100%; outline: none; font-family: inherit; box-sizing: border-box;">
+        
+        <a href="#" style="text-align: right; font-size: 13px; color: #16a34a; text-decoration: none; font-weight: 500;">Quên mật khẩu?</a>
+
+        <button type="submit" id="popupLoginBtn" class="green-button" style="padding:10px; font-size:15px; border-radius:6px; width:100%; border:none; cursor:pointer;">
+            Đăng nhập
+        </button>
+    </form>
+</div>

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ChanhTea</title>
+        <%- include('partials/head') %>
+    </head>
+    <body>
+        <%- include('partials/header') %>
+        
+        <main id="Content">
+            <%- include('pages/' + page, { data }) %>
+        </main>
+        
+        <%- include('partials/footer') %>
+
+        <%- include('partials/login-modal') %>
+    </body>
+</html>

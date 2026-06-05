@@ -1,0 +1,33 @@
+<div class="product card <%= typeof extraClass !== 'undefined' ? extraClass : '' %> SlideInBottom" 
+    data-product-id="<%= product.id %>"
+    data-category="<%= product.category_slug || '' %>"
+    data-price="<%= Number(product.base_price || 0) %>"
+    data-store-scope="nearest"
+    data-image-url="<%= product.image_url || '' %>">
+    
+    <div class="image-layout">
+        <% if (product.image_url) { %>
+            <img src="<%= product.image_url %>" alt="<%= product.name %>" loading="lazy">
+        <% } else { %>
+            <div class="product-image-placeholder" role="img" aria-label="<%= product.name %>">
+                <span>🍋</span>
+                <small>Ảnh từ Supabase</small>
+            </div>
+        <% } %>
+    </div>
+    <div class="product-body">
+        <h3><%= product.name %></h3>
+        <p><%= product.description || "" %></p>
+    </div>
+    <div class="product-footer">
+        <span class="price"><%= Number(product.base_price || 0).toLocaleString("vi-VN") %> VND</span>
+        <button class="add-btn" onclick="Addproduct(this.closest('.product'))" aria-label="Thêm <%= product.name %> vào giỏ">
+            <svg class="scale" width="30px" height="30px" viewBox="0 0 32 32">
+                <path transform="translate(-466.000000, -1089.000000)"
+                    d="M488,1106 L483,1106 L483,1111 C483,1111.55 482.553,1112 482,1112 C481.447,1112 481,1111.55 481,1111 L481,1106 L476,1106 C475.447,1106 475,1105.55 475,1105 C475,1104.45 475.447,1104 476,1104 L481,1104 L481,1099 C481,1098.45 481.447,1098 482,1098 C482.553,1098 483,1098.45 483,1099 L483,1104 L488,1104 C488.553,1104 489,1104.45 489,1105 C489,1105.55 488.553,1106 488,1106 L488,1106 Z M482,1089 C473.163,1089 466,1096.16 466,1105 C466,1113.84 473.163,1121 482,1121 C490.837,1121 498,1113.84 498,1105 C498,1096.16 490.837,1089 482,1089 L482,1089 Z">
+                </path>
+            </svg>
+        </button>
+    </div>
+</div>
+

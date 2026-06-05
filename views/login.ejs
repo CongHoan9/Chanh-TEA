@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="TEXT/css" href="login.css">
+<link rel="stylesheet" type="TEXT/css" href="toast.css">
+    </head>
+    <body>
+        <div class="login-page">
+            <div class="login-box">
+                <a class="logo">
+                    <span class="logo-yellow">Chanh</span><span class="logo-green">Tea</span>
+                </a>
+                <h2>Đăng nhập vào hệ thống</h2>
+                <p>Vui lòng nhập thông tin đăng nhập của bạn</p>
+                <div class="alert error">
+                    <svg fill="none" width="20" height="20" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M12 2a10 10 0 100 20 10 10 0 000-20z" />
+                    </svg>
+                    <span>Vui lòng nhập đầy đủ thông tin</span>
+                </div>
+                <form id="loginForm">
+    <div class="input-wrapper">
+        <select id="roleSelect" class="role-select" style="width: 100%; margin-top:8px;">
+            <option value="admin">Quản trị</option>
+            <option value="branch">Chi nhánh</option>
+        </select>
+    </div>
+
+    <!-- Admin Email Input -->
+    <div class="input-wrapper" id="adminEmailWrapper">
+        <input class="highlight" type="email" id="email" name="email" placeholder="Nhập email quản trị" />
+    </div>
+
+    <!-- Region Select Input -->
+    <div class="input-wrapper" id="regionSelectWrapper" style="display:none;">
+        <select id="regionSelect" class="role-select" style="width: 100%; margin-top:8px;">
+            <option value="">Chọn khu vực...</option>
+        </select>
+    </div>
+
+    <!-- Branch Select Input -->
+    <div class="input-wrapper" id="branchSelectWrapper" style="display:none;">
+        <select id="branchSelect" class="role-select" style="width: 100%; margin-top:8px;">
+            <option value="">Vui lòng chọn khu vực trước...</option>
+        </select>
+    </div>
+
+    <div class="input-wrapper">
+        <input class="highlight" type="password" id="password" name="password" placeholder="Nhập mật khẩu" required />
+    </div>
+
+    <button type="submit" class="btn green" id="loginBtn">
+        <svg width="20px" height="20px" viewBox="0 0 24 24" stroke="white" fill="none">
+            <path d="M15 4H18C19.1046 4 20 4.89543 20 6V18C20 19.1046 19.1046 20 18 20H15M11 16L15 12M15 12L11 8M15 12H3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+         Đăng nhập
+    </button>
+</form>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const roleSelect = document.getElementById('roleSelect');
+        const adminEmailWrapper = document.getElementById('adminEmailWrapper');
+        const regionSelectWrapper = document.getElementById('regionSelectWrapper');
+        const branchSelectWrapper = document.getElementById('branchSelectWrapper');
+        const regionSelect = document.getElementById('regionSelect');
+        const branchSelect = document.getElementById('branchSelect');
+        const emailInput = document.getElementById('email');
+        
+        let allStores = [];
+
+        // Initially require email for admin
+        emailInput.required = true;
+
+        // Toggle UI based on role
+        roleSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'admin') {
+                adminEmailWrapper.style.display = 'block';
+                regionSelectWrapper.style.display = 'none';
+                branchSelectWrapper.style.display = 'none';
+                emailInput.required = true;
+                regionSelect.required = false;
+                branchSelect.required = false;
+            } else {
+                adminEmailWrapper.style.display = 'none';
+                regionSelectWrapper.style.display = 'block';
+                branchSelectWrapper.style.display = 'block';
+                emailInput.required = false;
+                regionSelect.required = true;
+                branchSelect.required = true;
+            }
+        });
+        
+        regionSelect.addEventListener('change', (e) => {
+            const regionId = e.target.value;
+            if (!regionId) {
+                branchSelect.innerHTML = '<option value="">Vui lòng chọn khu vực trước...</option>';
+                return;
+            }
+            const storesInRegion = allStores.filter(s => s.region_id === regionId);
+            if (storesInRegion.length > 0) {
+                branchSelect.innerHTML = '<option value="">-- Chọn chi nhánh --</option>' + storesInRegion.map(store => 
+                    `<option value="${store.email}">${store.name}</option>`
+                ).join('');
+            } else {
+                branchSelect.innerHTML = '<option value="">Không có chi nhánh nào</option>';
+            }
+        });
+
+        // Load data dynamically
+        try {
+            const [regRes, stoRes] = await Promise.all([
+                fetch('/api/public/regions'),
+                fetch('/api/public/stores')
+            ]);
+            
+            const regData = await regRes.json();
+            const stoData = await stoRes.json();
+            
+            if (regData.success && regData.data.length > 0) {
+                regionSelect.innerHTML = '<option value="">Chọn khu vực...</option>' + regData.data.map(r => 
+                    `<option value="${r.id}">${r.name}</option>`
+                ).join('');
+            }
+            
+            if (stoData.success) {
+                allStores = stoData.data || [];
+            }
+        } catch (err) {
+            console.error(err);
+            regionSelect.innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
+        }
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e){
+        e.preventDefault();
+        
+        const role = document.getElementById('roleSelect').value;
+        const email = role === 'admin' 
+            ? document.getElementById('email').value 
+            : document.getElementById('branchSelect').value;
+        const password = document.getElementById('password').value;
+        
+        const alertBox = document.querySelector('.alert.error');
+        const alertMsg = alertBox.querySelector('span');
+        const btn = document.getElementById('loginBtn');
+        
+        if (role === 'branch' && !email) {
+            alertMsg.textContent = 'Vui lòng chọn chi nhánh';
+            alertBox.style.display = 'flex';
+            return;
+        }
+        
+        try {
+            btn.disabled = true;
+            btn.style.opacity = 0.7;
+            
+            const response = await fetch('/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok && result.success) {
+                localStorage.setItem('auth_token', result.token);
+                if(result.user) {
+                    localStorage.setItem('user_info', JSON.stringify(result.user));
+                }
+                window.location.href = '/dashboard';
+            } else {
+                showToast(result.message || 'Đăng nhập thất bại', 'error');
+            }
+        } catch (error) {
+            showToast('Lỗi kết nối máy chủ', 'error');
+        } finally {
+            btn.disabled = false;
+            btn.style.opacity = 1;
+        }
+    });
+</script>
+<script src="toast.js"></script>
+            <div id="toastContainer" class="toast-container"></div>
+</div>
+        </div>
+    </body>
+</html>
