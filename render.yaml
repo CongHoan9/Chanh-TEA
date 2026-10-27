@@ -12,3 +12,17 @@ services:
         sync: false
       - key: DATABASE_URL
         sync: false
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        value: ""
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        value: ""
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: GOOGLE_MAPS_API_KEY
+        value: ""
+      - key: MAPBOX_ACCESS_TOKEN
+        value: ""
+      - key: TURNSTILE_SITE_KEY
+        value: ""
+      - key: TURNSTILE_SECRET_KEY
+        value: ""
