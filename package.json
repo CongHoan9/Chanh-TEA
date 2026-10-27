@@ -4,19 +4,20 @@
   "description": "Website bán trà chanh",
   "main": "src/app.js",
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "@supabase/supabase-js": "^2.38.0",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
+    "ejs": "^6.0.1",
     "express": "^4.18.2",
-    "express-handlebars": "^7.1.2",
-    "express-session": "^1.17.3",
     "helmet": "^7.1.0",
     "morgan": "^1.10.0",
-    "pg": "^8.20.0"
+    "pg": "^8.21.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
